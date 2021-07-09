@@ -1,37 +1,44 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from './Spinner';
+
+//constructor only has one job - to initialize state object
 
 class App extends React.Component {
-    constructor(props) {
-        super(props);
+    state = { lat: null, errorMessage: '' }
 
-        //this is the only time we do direct assignment to this.state
-        this.state = {lat: null, errorMessage: ''};
+        componentDidMount() {
+            window.navigator.geolocation.getCurrentPosition(
+                (position) =>
+                    this.setState({ lat: position.coords.latitude }),
+                (err) => this.setState({ errorMessage: err.message })
+            );
+        }
 
-        window.navigator.geolocation.getCurrentPosition(
-
-            //position below is 'giving the callback'
-            (position) => {
-                this.setState({lat: position.coords.latitude});  
-            },
-            (err) => {
-                this.setState({errorMessage: err.message })
-            }
-        );
-    }
-    render() {
-        //returning from the constructor function
+    renderContent() {
         if (this.state.errorMessage && !this.state.lat) {
-            return <div> {this.state.errorMessage} </div>
+            return <div> Error:{this.state.errorMessage} </div>;
         }
-
         if (!this.state.errorMessage && this.state.lat) {
-            return <div> Latitude: {this.state.lat}</div>
+            return <SeasonDisplay lat={this.state.lat} />
         }
-
-        return <div>Loading!</div>;
+        return <Spinner message="Please accept location request" />;
     }
-}
-ReactDOM.render(<App />, document.querySelector('#root'));
+
+        render() {
+            return (
+                <div className="border red">
+                    {this.renderContent()}
+                </div>
+            );
+        }
+    }
+            
+    ReactDOM.render(<App />, document.querySelector('#root'));
 
 //conditional rendering
+//if latitude property changes, goign to be put into new season display
+//which will be rerendered again
+//default props
+//avoid conditionals in render - helper method
